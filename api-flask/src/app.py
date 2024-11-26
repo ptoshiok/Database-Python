@@ -2,6 +2,7 @@ import os
 
 from datetime import datetime
 from flask import Flask, current_app
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy as sa
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -10,10 +11,12 @@ class Base(DeclarativeBase):
     pass
 
 db = SQLAlchemy(model_class = Base)
+migrate = Migrate()
 
 class User(db.Model):
     id: Mapped[int] = mapped_column(sa.Integer, primary_key=True)
     username: Mapped[str] = mapped_column(sa.String, unique=True, nullable=False)
+    active: Mapped[bool] = mapped_column(sa.Boolean, default=True, nullable=True)
     
     def __repr__(self) -> str:
         return f"User(id={self.id}, username={self.username!r})"
@@ -45,6 +48,7 @@ def create_app(test_config=None):
         SECRET_KEY='dev',
         SQLALCHEMY_DATABASE_URI='sqlite:///bank-database.sqlite',
     )
+    
 
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
@@ -53,6 +57,7 @@ def create_app(test_config=None):
 
     app.cli.add_command(init_db_command)
     db.init_app(app)
+    migrate.init_app(app, db)
 
     # register blueprints
     from src.controller import user, post
