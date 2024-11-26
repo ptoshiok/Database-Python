@@ -18,6 +18,7 @@ class User(db.Model):
     def __repr__(self) -> str:
         return f"User(id={self.id}, username={self.username!r})"
 
+
 class Post(db.Model):
     id: Mapped[int] = mapped_column(sa.Integer, primary_key=True)
     author_id: Mapped[int] = mapped_column(sa.ForeignKey('user.id'), nullable=False)
@@ -35,6 +36,7 @@ def init_db_command():
     with current_app.app_context():
         db.create_all()
     click.echo('Initialized the database.')
+
 
 def create_app(test_config=None):
     # create and configure the app
